@@ -11,8 +11,6 @@ from openpyxl.styles import Alignment , Font , PatternFill
 
 start_time = time.perf_counter()
 
-BASE_NAME = f"https://books.toscrape.com/catalogue"
-
 CSV_FILE = r"D:\Programs\Python\projects\Book_Scraper\books.csv"
 
 EXCEL_FILE = r"D:\Programs\Python\projects\Book_Scraper\books.xlsx"
@@ -220,7 +218,7 @@ def save_excel(data):
 books_found = 0
 page_number = 1
 
-url = urljoin(BASE_NAME , f"/page-{page_number}.html")
+url = f"https://books.toscrape.com/catalogue/page-{page_number}.html"
 
 all_books = []
 
