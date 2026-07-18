@@ -1,35 +1,47 @@
 # Book Scraper
 
-## Description
-A Python web scraper that collects book information from Books to Scrape and exports the data to CSV and Excel files.
+A Python web scraping project that extracts book information from Books to Scrape.
 
 ## Features
-- Scrapes all catalogue pages
-- Collects detailed information for every book
-- Handles failed requests with retries
-- Exports data to CSV
-- Exports data to Excel
-- Formats the Excel header
-- Displays scraping statistics
+
+- Scrapes all book pages
+- Extracts:
+  - Title
+  - Price
+  - Availability
+  - Rating
+  - UPC
+  - Product Type
+  - Tax
+  - Number of Reviews
+  - Description
+- Saves data to:
+  - CSV
+  - Excel (.xlsx)
 
 ## Technologies
+
 - Python
 - Requests
-- BeautifulSoup4
-- OpenPyXL
+- BeautifulSoup
+- openpyxl
+- csv
 
-## Installation
+## How to Run
+
+1. Install the requirements:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## Run
+2. Run:
 
 ```bash
 python scraper.py
 ```
 
 ## Output
+
 - books.csv
 - books.xlsx
