@@ -7,9 +7,13 @@ from bs4 import BeautifulSoup
 from openpyxl import Workbook
 from openpyxl.styles import Alignment , Font , PatternFill
 
-
-
 start_time = time.perf_counter()
+
+
+# Configuration
+# =========================
+
+BASE_URL = "https://books.toscrape.com/catalogue/"
 
 CSV_FILE = r"D:\Programs\Python\projects\Book_Scraper\books.csv"
 
@@ -19,17 +23,18 @@ REQUEST_TIMEOUT = 10
 
 MAX_RETRIES = 3
 
+HEADERS  = {"User-Agent" : ("Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36")}
+
+FIELDNAMES = ["Title" , "Price" , "Availability" , "Rating" , "Book Link" , "UPC" , "Product Type" ,"Price (excl. tax)" , "Price (incl. tax)" , "Tax" , "Number of reviews" ,"Description"]
+
+# ===========================
+
 
 def get_page(url):
     """ download the requested page and gives 3 retries """
 
-    headers = {
-        "User-Agent" : "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
-    }
-
-
     session = requests.Session()
-    session.headers.update(headers)
+    session.headers.update(HEADERS)
 
 
     for attempt  in range(MAX_RETRIES):
@@ -46,7 +51,19 @@ def get_page(url):
     else:
         print("Failed")
         return None
+
+
+def get_table_value(Book_soup , name):
+    """ get the book details value """
+        
+    table = Book_soup.select_one("table.table.table-striped")
+
+    details = table.find("th" , string=name)
+    return details.find_next("td").text
     
+
+
+
 def scrape_all_books(soup , page_url):
     """ get all the books data in the page """
 
@@ -83,34 +100,21 @@ def scrape_all_books(soup , page_url):
         book_soup = BeautifulSoup(book_response.text , "html.parser")
 
 
-        table = book_soup.select_one("table.table.table-striped")
-        
-        upc = table.find("th" , string="UPC")
-        upc = upc.find_next("td").text
-        
+        upc = get_table_value(book_soup , "UPC")
 
-        product_type = table.find("th" , string="Product Type")
-        product_type = product_type.find_next("td").text
+        product_type = get_table_value(book_soup , "Product Type")
 
+        price_excl_tax = get_table_value(book_soup , "Price (excl. tax)")
 
-        price_excl_tax = table.find("th" , string="Price (excl. tax)")
-        price_excl_tax = price_excl_tax.find_next("td").text
-        
-        
-        price_incl_tax = table.find("th" , string="Price (incl. tax)")
-        price_incl_tax = price_incl_tax.find_next("td").text
+        price_incl_tax = get_table_value(book_soup , "Price (incl. tax)")
 
+        tax = get_table_value(book_soup , "Tax")
 
-        tax = table.find("th" , string="Tax")
-        tax = tax.find_next("td").text
-
-
-        number_of_reviews = table.find("th" , string="Number of reviews")
-        number_of_reviews = number_of_reviews.find_next("td").text
+        number_of_reviews = get_table_value(book_soup , "Number of reviews")
 
         description = book_soup.select_one("div.sub-header").find_next("p").text
         description = description.replace("\u2028" , "").replace("\u2029" , "").replace("\n" , "").replace("\r" ,"")
-
+        
 
         all_books.append({
             "Title" : title,
@@ -119,7 +123,7 @@ def scrape_all_books(soup , page_url):
             "Rating" : rating,
             "Book Link" : book_link,
             "UPC" : upc,
-            "Product type" : product_type,
+            "Product Type" : product_type,
             "Price (excl. tax)" : price_excl_tax,
             "Price (incl. tax)" : price_incl_tax,
             "Tax" : tax,
@@ -137,7 +141,7 @@ def save_csv(data):
 
         writer = csv.DictWriter(
             file,
-            fieldnames= ["Title" , "Price" , "Availability" , "Rating" , "Book Link" , "UPC" , "Product type" ,"Price (excl. tax)" , "Price (incl. tax)" , "Tax" , "Number of reviews" ,"Description"]
+            fieldnames= FIELDNAMES
         )
 
         writer.writeheader()
@@ -152,11 +156,12 @@ def save_excel(data):
 
     sheet = workbook.active
 
-    sheet.append(["Title" , "Price" , "Availability" , "Rating" , "Book Link" , "UPC" , "Product type" ,"Price (excl. tax)" , "Price (incl. tax)" , "Tax" , "Number of reviews" ,"Description"])
+    sheet.append(FIELDNAMES)
 
     for book in data:
 
-        sheet.append([book["Title"] , book["Price"] ,book["Availability"] ,book["Rating"] ,book["Book Link"] ,book["UPC"] ,book["Product type"] ,book["Price (excl. tax)"] ,book["Price (incl. tax)"] ,book["Tax"] ,book["Number of reviews"] ,book["Description"] ,])
+        for fieldname in FIELDNAMES:
+            sheet.append([book[fieldname]])
 
 
 
@@ -218,7 +223,7 @@ def save_excel(data):
 books_found = 0
 page_number = 1
 
-url = f"https://books.toscrape.com/catalogue/page-{page_number}.html"
+url = urljoin(BASE_URL, f"page-{page_number}.html")
 
 all_books = []
 
