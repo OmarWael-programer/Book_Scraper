@@ -1,11 +1,11 @@
-# Book Scraper
+# 📚 Book Scraper
 
-A Python web scraping project that extracts book information from Books to Scrape.
+A Python web scraper that collects book information from Books to Scrape and exports the data to multiple file formats.
 
 ## Features
 
-- Scrapes all book pages
-- Extracts:
+- Scrapes all books from every page
+- Collects:
   - Title
   - Price
   - Availability
@@ -23,19 +23,16 @@ A Python web scraping project that extracts book information from Books to Scrap
 
 - Python
 - Requests
-- BeautifulSoup
+- BeautifulSoup4
 - openpyxl
-- csv
 
-## How to Run
-
-1. Install the requirements:
+## Installation
 
 ```bash
 pip install -r requirements.txt
 ```
 
-2. Run:
+## Run
 
 ```bash
 python scraper.py
